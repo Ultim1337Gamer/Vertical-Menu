@@ -1,34 +1,128 @@
-*.gem
-*.rbc
-/.config
-/coverage/
-/InstalledFiles
-/pkg/
-/spec/reports/
-/test/tmp/
-/test/version_tmp/
-/tmp/
+#===============================================================================
+# U1G Engine : Vertical Horror Game Menu
+#===============================================================================
+# Coded By : Ultim1337Gamer
+#==============================================================================#
+#===========================INFO & TERMS OF USE================================#
+# This script adds a highly cutomizable vertical menu to your game.            #
+#==============================================================================#
+# Free for Commercial & Non Commercial use.As long as I'm credited.            #
+#==============================================================================#
 
-## Specific to RubyMotion:
-.dat*
-.repl_history
-build/
+#===============================================================================
+# CUSTOMIZABLE SECTION
+#===============================================================================
+module U1G
+XPos      = 0         # The X Position of the Menu
+YPos      = 365       # The Y Position of the Menu
+Width     = 545       # The Width of the Menu
+Height    = 0         # The Height of the Menu
+ItemsComm = "Items"   # The name of the Items Command
+SaveComm  = "Save"    # The name of the Save Command
+EquipComm = "Equip"   # The name of the Equip Command
+GEComm    = "Game End"# The name of the Game End Command
+end
+    
+#===============================================================================
+# END CUSTOMIZABLE SECTION
+#===============================================================================    
+class Window_U1G_Menu < Window_HorzCommand
+      
+#--------------------------------------------------------------------------
+# Loading Size Information
+#--------------------------------------------------------------------------
+  def initialize(x, y, width, height)
+   @window_width = width
+   @window_height = height
+   super(x, y)
+end
+#--------------------------------------------------------------------------
+# Loading Window Width
+#--------------------------------------------------------------------------
+  def window_width
+    @window_width
+end
+#--------------------------------------------------------------------------
+# Loading Window Height
+#--------------------------------------------------------------------------
+def window_height
+  @window_height
+end
 
-## Documentation cache and generated files:
-/.yardoc/
-/_yardoc/
-/doc/
-/rdoc/
+#--------------------------------------------------------------------------
+# Making Command List
+#--------------------------------------------------------------------------
+def make_command_list
+  add_command(U1G::ItemsComm,  :item)
+  add_command(U1G::SaveComm,   :save)
+  add_command(U1G::EquipComm,  :equip)        
+  add_command(U1G::GEComm,     :game_end)
+ end
+end
 
-## Environment normalisation:
-/.bundle/
-/lib/bundler/man/
 
-# for a library or gem, you might want to ignore these files since the code is
-# intended to run in multiple environments; otherwise, check them in:
-# Gemfile.lock
-# .ruby-version
-# .ruby-gemset
+class Scene_Map < Scene_Base
 
-# unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
-.rvmrc
+#--------------------------------------------------------------------------
+# "Initialazing" Menu
+#--------------------------------------------------------------------------
+alias :u1g_call_menu call_menu
+  def call_menu
+    u1g_call_menu
+    Sound.play_ok
+    SceneManager.call(Scene_U1G_Menu)
+    Window_MenuCommand::init_command_position
+ end  
+end
+     
+class Scene_U1G_Menu < Scene_MenuBase
+#--------------------------------------------------------------------------
+# Starting Menu
+#--------------------------------------------------------------------------
+def start
+    super
+    create_command_window
+end
+#--------------------------------------------------------------------------
+# Creating Commands
+#--------------------------------------------------------------------------
+ def create_command_window
+    @command_window = Window_U1G_Menu.new(U1G::XPos,U1G::YPos,U1G::Width,U1G::Height)
+    @command_window.set_handler(:item,      method(:command_item))
+    @command_window.set_handler(:save,      method(:command_save))
+    @command_window.set_handler(:equip,     method(:command_equip))
+    @command_window.set_handler(:game_end,  method(:command_game_end))
+    @command_window.set_handler(:cancel,    method(:return_scene))
+end
+      
+#--------------------------------------------------------------------------
+# Calling Items Scene
+#--------------------------------------------------------------------------
+  def command_item
+    SceneManager.call(Scene_Item)
+end
+#--------------------------------------------------------------------------
+# Calling Save Scene
+#--------------------------------------------------------------------------
+  def command_save
+    SceneManager.call(Scene_Save)
+end
+#---------------------------------------------------------------------------
+# Calling Equip Scene
+#--------------------------------------------------------------------------
+  def command_equip
+    SceneManager.call(Scene_Equip)
+end 
+#--------------------------------------------------------------------------
+# Calling Game End Scene
+#--------------------------------------------------------------------------
+  def command_game_end
+    SceneManager.call(Scene_End)
+end
+#--------------------------------------------------------------------------
+# Continue Playing
+#--------------------------------------------------------------------------
+  def return_scene
+    SceneManager.call(Scene_Map)
+  end
+end
